@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>mvntest</groupId>
+  <artifactId>mvntest</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>mvntest</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <github.global.server>github</github.global.server>
+
+
+    <!-- Github リポジトリユーザー名 -->
+        <github.global.userName>roovesmart</github.global.userName>
+        <!-- Github リポジトリユーザーのパスワード -->
+        <github.global.password>d50cf20b078f2fd3bb2eabe11ef46f51842595cf</github.global.password>
+
+  </properties>
+
+	<!-- Create a artifacts to local maven repository -->
+	<distributionManagement>
+		<repository>
+			<id>internal.repos</id>
+			<name>Temporary Staging Repository</name>
+			<url>file://${project.build.directory}/mvn-repo</url>
+		</repository>
+	</distributionManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- 独自ライブラリをgithubリポジトリから取得する
+    <dependency>
+            <groupId>com.appspot.roovemore.slim3.modelcache</groupId>
+            <artifactId>roovemore-slim3-modelcache</artifactId>
+            <version>2.0-SNAPSHOT</version>
+    </dependency>-->
+
+  </dependencies>
+
+  <!-- 独自ライブラリをgithubリポジトリから取得する-->
+  <!-- これをいれなくてもディペンデンシーは動くっぽい githubはセントラル？だから -->
+  <!-- <url>https://github.com/roovesmart/roovemore-slim3-modelcache/mvn-repo</url>  -->
+<!--
+      <repositories>
+        <repository>
+            <id>github-maven</id>
+            <url>https://github.com/roovesmart/roovemore-slim3-modelcache/tree/mvn-repo</url>
+        </repository>
+    </repositories>
+-->
+
+	<!-- Upload from local maven repository to github -->
+	<build>
+		<plugins>
+			<plugin>
+
+				<groupId>com.appspot.roovemore.plugins</groupId>
+				<artifactId>maven-github-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+
+				<configuration>
+
+					<!-- git push時のコミットコメント -->
+					<!-- コメントci skipはtravis ciの仕様で、このコメントがあるとciをスキップしてくれる。はずらしいが実際はしてくれないっぽい… -->
+					<message>Auto push maven artifacts for ${project.version} ci skip</message>
+
+					<noJekyll>true</noJekyll>
+					<!-- 事前に成果物をデプロイした場所から吸い上げ、github側に反映するイメージ -->
+					<!-- 基本的にはmaven-deploy-plugin or distributionManagement にて配備したディレクトリと合わせる -->
+					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+					<!-- この場合ブランチ名は、mvn-repo。もしgit上でこのブランチがなくてもエラーとならず、このブランチを生成してくれる -->
+					<branch>refs/heads/mvn-repo</branch>
+					<includes><include>**/*</include></includes>
+					<!-- 最終的に他プロジェクトでdependencyする際は repositoryName、repositoryOwnerを組立URLとしている？-->
+					<repositoryName>${project.artifactId}</repositoryName>
+					<repositoryOwner>roovesmart</repositoryOwner>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
