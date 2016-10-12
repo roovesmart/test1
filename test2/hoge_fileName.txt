@@ -1,0 +1,2 @@
+hoge_value
+改行
