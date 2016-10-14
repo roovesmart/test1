@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>mvntest</groupId>
+  <artifactId>mvntest</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>mvntest</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <github.global.server>github</github.global.server>
+
+<!--
+	<github.global.userName>roovesmart</github.global.userName>
+	<github.global.password>d50cf20b078f2fd3bb2eabe11ef46f51842595cf</github.global.password>
+-->
+
+  </properties>
+
+	<!-- Create a artifacts to local maven repository -->
+	<distributionManagement>
+		<repository>
+			<id>internal.repos</id>
+			<name>Temporary Staging Repository</name>
+			<url>file://${project.build.directory}/mvn-repo</url>
+		</repository>
+	</distributionManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- 独自ライブラリをgithubリポジトリから取得する
+    <dependency>
+            <groupId>com.appspot.roovemore.slim3.modelcache</groupId>
+            <artifactId>roovemore-slim3-modelcache</artifactId>
+            <version>2.0-SNAPSHOT</version>
+    </dependency>-->
+
+  </dependencies>
+
+
+	<!-- Upload from local maven repository to github -->
+	<build>
+		<plugins>
+
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<phase>validate</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.5</version>
+				<configuration>
+					<target>
+						<echo message="copy files"/>
+						<property name="fileDir" value="src/main/resources"/>
+						<copy file="${basedir}/FileA.txt" tofile="${project.build.directory}/mvn-repo/FileA.txt"/>
+					</target>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+
+
+
+			<plugin>
+
+				<groupId>com.appspot.roovemore.plugins</groupId>
+				<artifactId>github-maven-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+
+				<configuration>
+
+					<!--
+					 | The commit message used when committing the Deployed artifacts.
+					 | <message>It was auto push by com.appspot.roovemore.plugins#github-maven-plugin</message>
+					 | -->
+
+					<!--
+					 | Set it to true to always create a '.nojekyll' file at the root of the site
+					 | if one doesn't already exist.
+					 | <noJekyll>false</noJekyll>
+					 | -->
+
+					<!--
+					 | Set it to true to merge with existing the existing tree that is referenced by the commit
+					 | that the ref currently points to
+					 | <merge>true</merge>
+					 | -->
+
+					<!--
+					 | The base directory to commit files.
+					 | Basically, you set the file path of the artifacts that have been deployed by distributionManagement
+					 | <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+					 | -->
+
+					<!--
+					 | Branch to update.
+					 | <branch>refs/heads/mvn-repo</branch>
+					 | -->
+
+					<!--
+					 | Paths and patterns to include
+					 | <includes>
+					 | 	<include>**/*</include>
+					 | </includes>
+					 -->
+
+					<!--
+					 | List for pushing any file to Github
+					 |  -->
+					<pushOptionFiles>
+						<pushOptionFile>
+							<fileName>test2/hoge_fileName.txt</fileName>
+							<text>hoge_value&#xA;改行</text>
+						</pushOptionFile>
+						<pushOptionFile>
+							<fileName>hoge_fileName2</fileName>
+							<text>hoge_value2</text>
+						</pushOptionFile>
+					</pushOptionFiles>
+
+					<!-- 最終的に他プロジェクトでdependencyする際は repositoryName、repositoryOwnerを組立URLとしている？-->
+					<!--
+					<repositoryName>${project.artifactId}</repositoryName>
+					 -->
+					<repositoryName>test1</repositoryName>
+					<repositoryOwner>roovesmart</repositoryOwner>
+
+				</configuration>
+
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
